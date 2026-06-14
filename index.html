@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz Archiwum Społeczne</title>
+
+  <style>
+:root {
+      --navy: #0b1f4d;
+      --navy-light: #12306f;
+      --white: #ffffff;
+      --background: #f7f9fc;
+      --text: #111827;
+      --muted: #64748b;
+      --border: rgba(11, 31, 77, 0.12);
+      --shadow: 0 24px 70px rgba(11, 31, 77, 0.14);
+      --radius-large: 32px;
+      --radius-medium: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Roboto, Arial, sans-serif;
+      background: linear-gradient(135deg, #ffffff 0%, var(--background) 100%);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+    }
+
+    .quiz-card {
+      width: 100%;
+      max-width: 1080px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-large);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      animation: enter 0.45s ease-out;
+    }
+
+    .quiz-header {
+      background: var(--navy);
+      color: var(--white);
+      padding: 28px 40px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .quiz-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.12);
+      display: grid;
+      place-items: center;
+      font-size: 26px;
+      font-weight: 700;
+      flex: 0 0 auto;
+    }
+
+    .eyebrow {
+      margin: 0 0 6px;
+      font-size: 13px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.78);
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(26px, 4vw, 38px);
+      line-height: 1.12;
+    }
+
+    .quiz-content {
+      padding: 40px;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 40px;
+      align-items: center;
+    }
+
+    .image-frame {
+      border-radius: 28px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 18px 42px rgba(11, 31, 77, 0.12);
+      background: #eef2f7;
+      min-height: 430px;
+    }
+
+    .image-frame img {
+      width: 100%;
+      height: 430px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .question-meta {
+      margin: 0 0 8px;
+      color: rgba(11, 31, 77, 0.65);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      margin: 0;
+      color: var(--navy);
+      font-size: clamp(24px, 3vw, 34px);
+      line-height: 1.15;
+    }
+
+    .hint {
+      margin: 14px 0 24px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .answers {
+      display: grid;
+      gap: 14px;
+    }
+
+    .answer {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: var(--white);
+      color: var(--navy);
+      border-radius: var(--radius-medium);
+      padding: 17px 20px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      font-size: 18px;
+      font-weight: 800;
+      box-shadow: 0 5px 14px rgba(11, 31, 77, 0.04);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.2s ease, background 0.2s ease;
+    }
+
+    .answer:hover {
+      transform: translateY(-2px);
+      border-color: rgba(11, 31, 77, 0.34);
+      box-shadow: 0 14px 28px rgba(11, 31, 77, 0.12);
+    }
+
+    .answer:focus {
+      outline: 4px solid rgba(11, 31, 77, 0.14);
+      outline-offset: 2px;
+    }
+
+    .answer.selected {
+      background: var(--navy);
+      color: var(--white);
+      border-color: var(--navy);
+      box-shadow: 0 18px 36px rgba(11, 31, 77, 0.22);
+    }
+
+    .answer-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .number {
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: rgba(11, 31, 77, 0.07);
+      color: var(--navy);
+      font-size: 14px;
+      font-weight: 900;
+      flex: 0 0 auto;
+    }
+
+    .answer.selected .number {
+      background: rgba(255, 255, 255, 0.16);
+      color: var(--white);
+    }
+
+    .result {
+      margin-top: 18px;
+      border-radius: var(--radius-medium);
+      padding: 16px 18px;
+      font-weight: 700;
+      line-height: 1.5;
+      display: none;
+    }
+
+    .result.show {
+      display: block;
+      animation: fadeUp 0.25s ease-out;
+    }
+
+    .result.correct {
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    .result.wrong {
+      background: #f1f5f9;
+      color: var(--navy);
+      border: 1px solid var(--border);
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 22px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 18px;
+      padding: 14px 24px;
+      font-weight: 900;
+      cursor: pointer;
+      font-size: 15px;
+      transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--navy);
+      color: var(--white);
+      box-shadow: 0 14px 28px rgba(11, 31, 77, 0.2);
+    }
+
+    .btn-primary:hover {
+      background: var(--navy-light);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: var(--white);
+      color: var(--navy);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(11, 31, 77, 0.05);
+      transform: translateY(-2px);
+    }
+
+    @keyframes enter {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+
+    .answer.correct-answer {
+      background: #0b1f4d;
+      color: #ffffff;
+      border-color: #0b1f4d;
+      box-shadow: 0 18px 36px rgba(11, 31, 77, 0.22);
+    }
+
+    .answer.wrong-answer {
+      background: #f8fafc;
+      color: var(--navy);
+      border-color: rgba(185, 28, 28, 0.35);
+      box-shadow: 0 12px 24px rgba(185, 28, 28, 0.08);
+    }
+
+    .answer.disabled {
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .answer.correct-answer .number {
+      background: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+    }
+
+    .answer.wrong-answer .number {
+      background: rgba(185, 28, 28, 0.08);
+      color: #991b1b;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(11, 31, 77, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .progress-fill {
+      width: 20%;
+      height: 100%;
+      background: var(--navy);
+      border-radius: 999px;
+      transition: width 0.25s ease;
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .summary {
+      display: none;
+      text-align: center;
+      padding: 24px 0 4px;
+    }
+
+    .summary.show {
+      display: block;
+      animation: fadeUp 0.25s ease-out;
+    }
+
+    .summary h2 {
+      margin-bottom: 12px;
+    }
+
+    .summary p {
+      color: var(--muted);
+      line-height: 1.6;
+      margin: 0 auto 22px;
+      max-width: 540px;
+    }
+
+
+    @media (max-width: 860px) {
+      .quiz-content {
+        grid-template-columns: 1fr;
+        padding: 26px;
+      }
+
+      .quiz-header {
+        padding: 24px 26px;
+      }
+
+      .image-frame,
+      .image-frame img {
+        min-height: 300px;
+        height: 320px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      body {
+        padding: 18px 10px;
+      }
+
+      .quiz-card {
+        border-radius: 24px;
+      }
+
+      .quiz-header {
+        align-items: flex-start;
+      }
+
+      .quiz-content {
+        padding: 20px;
+        gap: 26px;
+      }
+
+      .image-frame,
+      .image-frame img {
+        height: 260px;
+        min-height: 260px;
+        border-radius: 22px;
+      }
+
+      .answer {
+        padding: 15px;
+        font-size: 16px;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="quiz-card">
+    <header class="quiz-header">
+      <div class="quiz-icon">?</div>
+      <div>
+        <p class="eyebrow">Quiz archiwalny</p>
+        <h1 id="header-title">Uczniowie stoją przed szkołą ...</h1>
+      </div>
+    </header>
+
+    <section class="quiz-content">
+      <div class="image-frame">
+        <img
+          id="question-image"
+          src="166453.png"
+          alt="Materiał archiwalny do pytania"
+        />
+      </div>
+
+      <div class="question-panel">
+        <div class="progress-bar" aria-hidden="true">
+          <div id="progress-fill" class="progress-fill"></div>
+        </div>
+
+        <div id="quiz-view">
+          <p id="question-meta" class="question-meta">Pytanie 1 z 5</p>
+          <h2 id="question-title">Wybierz jedną poprawną odpowiedź</h2>
+          <p id="question-hint" class="hint">Zaznacz odpowiedź, a potem przejdź dalej.</p>
+
+          <div id="answers" class="answers"></div>
+
+          <div id="result" class="result"></div>
+
+          <div class="actions">
+            <button id="next-btn" class="btn btn-primary" type="button" disabled>Dalej</button>
+            <button id="skip-btn" class="btn btn-secondary" type="button">Pomiń</button>
+          </div>
+        </div>
+
+        <div id="summary" class="summary">
+          <h2>Koniec quizu</h2>
+          <p id="summary-text">To miejsce możesz później rozbudować o wynik, opis lub link do kolejnej części archiwum.</p>
+          <button id="restart-btn" class="btn btn-primary" type="button">Rozpocznij ponownie</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    /*
+      JAK USTAWIĆ POPRAWNĄ ODPOWIEDŹ:
+
+      Przy każdym pytaniu znajdziesz pole:
+      correctAnswer: "TU_WPISZ_NUMER_POPRAWNEJ_ODPOWIEDZI"
+
+      Wpisz tam numer poprawnej odpowiedzi: 1, 2, 3 albo 4.
+      Przykład:
+      correctAnswer: 1
+
+      Ważne:
+      - wpisuj liczbę bez cudzysłowu,
+      - nie wpisuj true/false,
+      - numer odpowiada kolejności odpowiedzi w tablicy answers.
+    */
+
+    const questions = [
+      {
+        header: "Uczniowie stoją przed szkołą ...",
+        image: "166453.png",
+        imageAlt: "Uczniowie stojący przed szkołą",
+        title: "Gdzie wykonano tę fotografię?",
+        hint: "Wybierz miejscowość, z którą może być związany materiał archiwalny.",
+        correctAnswer: "1",
+        answers: [
+          "w Mrokowie",
+          "w Lesznowoli",
+          "w Łazach",
+          "w Magdalence"
+        ]
+      },
+      {
+        header: "Na zdjęciu widzimy fragment życia lokalnej społeczności ...",
+        image: "165713.png",
+        imageAlt: "Placeholder zdjęcia archiwalnego numer 2",
+        title: "Jaki typ wydarzenia może przedstawiać ten materiał?",
+        hint: "Podmień zdjęcie i wpisz numer poprawnej odpowiedzi w polu correctAnswer.",
+        correctAnswer: "3",
+        answers: [
+        "szkolne koło sportowe",
+        "harcerską zbiórkę terenową",
+        "młodzieżową drużynę pożarniczą",
+        "grupę uczniów podczas wycieczki"
+        ]
+      },
+      {
+        header: "Ten obiekt pochodzi z domowego zbioru pamiątek ...",
+        image: "PLACEHOLDER_ZDJECIE_3.png",
+        imageAlt: "Placeholder zdjęcia archiwalnego numer 3",
+        title: "Do jakiego rodzaju archiwaliów najlepiej pasuje ten obiekt?",
+        hint: "To pytanie możesz wykorzystać dla dokumentu, fotografii albo pamiątki.",
+        correctAnswer: "TU_WPISZ_NUMER_POPRAWNEJ_ODPOWIEDZI",
+        answers: [
+          "fotografia rodzinna",
+          "dokument urzędowy",
+          "pocztówka z korespondencją",
+          "plakat wydarzenia lokalnego"
+        ]
+      },
+      {
+        header: "Materiał dokumentuje codzienność mieszkańców ...",
+        image: "PLACEHOLDER_ZDJECIE_4.png",
+        imageAlt: "Placeholder zdjęcia archiwalnego numer 4",
+        title: "Jaki motyw życia społecznego jest tu najważniejszy?",
+        hint: "Odpowiedzi są placeholderami — możesz je dowolnie zmienić.",
+        correctAnswer: "TU_WPISZ_NUMER_POPRAWNEJ_ODPOWIEDZI",
+        answers: [
+          "edukacja i szkoła",
+          "praca i rzemiosło",
+          "świętowanie i obrzędy",
+          "transport i podróże"
+        ]
+      },
+      {
+        header: "W którym roku powstało OSA Lesznowola?",
+        image: "PLACEHOLDER_ZDJECIE_5.png",
+        imageAlt: "Placeholder zdjęcia archiwalnego numer 5",
+        title: "Co najlepiej opisuje wartość takiego materiału?",
+        hint: "To pytanie sprawdzi się jako podsumowanie quizu.",
+        correctAnswer: "4",
+        answers: [
+          "2024",
+          "2023",
+          "2022",
+          "2021"
+        ]
+      }
+    ];
+
+    const headerTitle = document.getElementById("header-title");
+    const questionImage = document.getElementById("question-image");
+    const questionMeta = document.getElementById("question-meta");
+    const questionTitle = document.getElementById("question-title");
+    const questionHint = document.getElementById("question-hint");
+    const answersContainer = document.getElementById("answers");
+    const result = document.getElementById("result");
+    const nextBtn = document.getElementById("next-btn");
+    const skipBtn = document.getElementById("skip-btn");
+    const restartBtn = document.getElementById("restart-btn");
+    const quizView = document.getElementById("quiz-view");
+    const summary = document.getElementById("summary");
+    const summaryText = document.getElementById("summary-text");
+    const progressFill = document.getElementById("progress-fill");
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let hasAnswered = false;
+
+    function getCorrectAnswerIndex(question) {
+      const correctNumber = Number(question.correctAnswer);
+      return correctNumber - 1;
+    }
+
+    function renderQuestion() {
+      const question = questions[currentQuestionIndex];
+
+      hasAnswered = false;
+      nextBtn.disabled = true;
+      result.className = "result";
+      result.textContent = "";
+
+      headerTitle.textContent = question.header;
+      questionImage.src = question.image;
+      questionImage.alt = question.imageAlt;
+      questionMeta.textContent = `Pytanie ${currentQuestionIndex + 1} z ${questions.length}`;
+      questionTitle.textContent = question.title;
+      questionHint.textContent = question.hint;
+      progressFill.style.width = `${((currentQuestionIndex + 1) / questions.length) * 100}%`;
+
+      nextBtn.textContent = currentQuestionIndex === questions.length - 1 ? "Zakończ quiz" : "Dalej";
+
+      answersContainer.innerHTML = "";
+
+      question.answers.forEach((answerText, index) => {
+        const button = document.createElement("button");
+        button.className = "answer";
+        button.type = "button";
+        button.dataset.index = String(index);
+
+        button.innerHTML = `
+          <span class="answer-left">
+            <span class="number">${index + 1}</span>
+            <span>${answerText}</span>
+          </span>
+          <span class="status"></span>
+        `;
+
+        button.addEventListener("click", () => selectAnswer(button));
+        answersContainer.appendChild(button);
+      });
+    }
+
+    function selectAnswer(selectedButton) {
+      if (hasAnswered) return;
+
+      const question = questions[currentQuestionIndex];
+      const correctAnswerIndex = getCorrectAnswerIndex(question);
+      const selectedAnswerIndex = Number(selectedButton.dataset.index);
+
+      if (Number.isNaN(correctAnswerIndex) || correctAnswerIndex < 0 || correctAnswerIndex > 3) {
+        result.className = "result show wrong";
+        result.textContent = "Najpierw ustaw poprawną odpowiedź w kodzie: correctAnswer musi mieć wartość 1, 2, 3 albo 4.";
+        return;
+      }
+
+      hasAnswered = true;
+      nextBtn.disabled = false;
+
+      const allButtons = answersContainer.querySelectorAll(".answer");
+      const isCorrect = selectedAnswerIndex === correctAnswerIndex;
+
+      if (isCorrect) score++;
+
+      allButtons.forEach((button) => {
+        const buttonIndex = Number(button.dataset.index);
+        const status = button.querySelector(".status");
+
+        button.classList.add("disabled");
+
+        if (buttonIndex === correctAnswerIndex) {
+          button.classList.add("correct-answer");
+          status.textContent = "✓";
+        }
+
+        if (buttonIndex === selectedAnswerIndex && !isCorrect) {
+          button.classList.add("wrong-answer");
+          status.textContent = "✕";
+        }
+      });
+
+      result.className = "result show " + (isCorrect ? "correct" : "wrong");
+      result.textContent = isCorrect
+        ? "Dobra odpowiedź! Kliknij „Dalej”, aby przejść do kolejnego pytania."
+        : "To nie ta odpowiedź. Poprawna odpowiedź została zaznaczona granatem.";
+    }
+
+    function goNext() {
+      if (currentQuestionIndex < questions.length - 1) {
+        currentQuestionIndex++;
+        renderQuestion();
+      } else {
+        showSummary();
+      }
+    }
+
+    function skipQuestion() {
+      if (currentQuestionIndex < questions.length - 1) {
+        currentQuestionIndex++;
+        renderQuestion();
+      } else {
+        showSummary();
+      }
+    }
+
+    function showSummary() {
+      quizView.style.display = "none";
+      summary.classList.add("show");
+      progressFill.style.width = "100%";
+      headerTitle.textContent = "Quiz zakończony";
+      summaryText.textContent = `Twój wynik: ${score} / ${questions.length}. Możesz tutaj dodać własny opis, link do archiwum albo komentarz edukacyjny.`;
+    }
+
+    function restartQuiz() {
+      currentQuestionIndex = 0;
+      score = 0;
+      quizView.style.display = "block";
+      summary.classList.remove("show");
+      renderQuestion();
+    }
+
+    nextBtn.addEventListener("click", goNext);
+    skipBtn.addEventListener("click", skipQuestion);
+    restartBtn.addEventListener("click", restartQuiz);
+
+    renderQuestion();
+  </script>
+</body>
+</html>
